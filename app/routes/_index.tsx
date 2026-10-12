@@ -50,9 +50,8 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 
   const nome = String(formulario.get("nome") || "").trim() || undefined;
-  const comCxconverter = formulario.get("cxconverter") === "on";
 
-  const resultado = await converterIfc(arquivo, nome, comCxconverter);
+  const resultado = await converterIfc(arquivo, nome);
   if (resultado.erro) {
     return json({ recado: `Não foi possível converter: ${resultado.erro}`, erro: true });
   }
@@ -93,12 +92,7 @@ export default function Index() {
               convertidos continuam abrindo
             </span>
           )}
-          {backend.ok && backend.pipelines ? (
-            <>
-              {" · pipelines: "}
-              {backend.pipelines.cxconverter ? "community + cxconverter" : "community"}
-            </>
-          ) : null}
+          {backend.ok && backend.pipelines ? " · pipeline: community" : null}
         </p>
       </header>
 
@@ -125,12 +119,6 @@ export default function Index() {
               className="rounded border border-neutral-600 bg-neutral-900 p-2 text-sm"
             />
           </label>
-          {backend.pipelines?.cxconverter ? (
-            <label className="flex items-center gap-2 text-sm text-neutral-400">
-              <input type="checkbox" name="cxconverter" />
-              usar cxconverter (XKT bem menor)
-            </label>
-          ) : null}
           <button
             type="submit"
             disabled={convertendo}

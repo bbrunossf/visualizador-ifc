@@ -112,13 +112,13 @@ const XeokitViewer: React.FC<XeokitViewerProps> = ({ modelId, xktSrc, canvasRef}
         distanceMeasurementsPlugin = new DistanceMeasurementsPlugin(viewer,            
         );
 
-        distanceMeasurementsPlugin.on("mouseOver", (e) => {
+        distanceMeasurementsPlugin.on("mouseOver", (e: any) => {
           if (endMeasurementEdit) {
             return;
           }
           e.distanceMeasurement.setHighlighted(true);
         });
-        distanceMeasurementsPlugin.on("mouseLeave", (e) => {
+        distanceMeasurementsPlugin.on("mouseLeave", (e: any) => {
           if (endMeasurementEdit) {
             return;
           }
@@ -160,68 +160,68 @@ const XeokitViewer: React.FC<XeokitViewerProps> = ({ modelId, xktSrc, canvasRef}
         // Create a context menu to delete and configure measurements
         //------------------------------------------------------------------------------------------------------------------
 
-        let endMeasurementEdit = null;
+        let endMeasurementEdit: any = null;
 
         const distanceMeasurementsContextMenu = new ContextMenu({
             items: [
                 [
                     {
                         title: "Clear",
-                        doAction: function (context) {
+                        doAction: function (context: any) {
                             context.distanceMeasurement.destroy();
                         }
                     },
                     {
-                        getTitle: (context) => {
+                        getTitle: (context: any) => {
                             return context.distanceMeasurement.axisVisible ? "Hide Axis" : "Show Axis";
                         },
-                        doAction: function (context) {
+                        doAction: function (context: any) {
                             context.distanceMeasurement.axisVisible = !context.distanceMeasurement.axisVisible;
                         }
                     },
                     {
-                        getTitle: (context) => {
+                        getTitle: (context: any) => {
                             return context.distanceMeasurement.xLabelEnabled && context.distanceMeasurement.labelsVisible ? "Disable X Label" : "Enable X Label";
                         },
-                        doAction: function (context) {
+                        doAction: function (context: any) {
                             context.distanceMeasurement.xLabelEnabled = !context.distanceMeasurement.xLabelEnabled;
                         }
                     },
                     {
-                        getTitle: (context) => {
+                        getTitle: (context: any) => {
                             return context.distanceMeasurement.yLabelEnabled && context.distanceMeasurement.labelsVisible ? "Disable Y Label" : "Enable Y Label";
                         },
-                        doAction: function (context) {
+                        doAction: function (context: any) {
                             context.distanceMeasurement.yLabelEnabled = !context.distanceMeasurement.yLabelEnabled;
                         }
                     },
                     {
-                        getTitle: (context) => {
+                        getTitle: (context: any) => {
                             return context.distanceMeasurement.zLabelEnabled && context.distanceMeasurement.labelsVisible ? "Disable Z Label" : "Enable Z Label";
                         },
-                        doAction: function (context) {
+                        doAction: function (context: any) {
                             context.distanceMeasurement.zLabelEnabled = !context.distanceMeasurement.zLabelEnabled;
                         }
                     },
                     {
-                        getTitle: (context) => {
+                        getTitle: (context: any) => {
                             return context.distanceMeasurement.lengthLabelEnabled && context.distanceMeasurement.labelsVisible ? "Disable Length Label" : "Enable Length Label";
                         },
-                        doAction: function (context) {
+                        doAction: function (context: any) {
                             context.distanceMeasurement.lengthLabelEnabled = !context.distanceMeasurement.lengthLabelEnabled;
                         }
                     },
                     {
-                        getTitle: (context) => {
+                        getTitle: (context: any) => {
                             return context.distanceMeasurement.labelsVisible ? "Hide All Labels" : "Show All Labels";
                         },
-                        doAction: function (context) {
+                        doAction: function (context: any) {
                             context.distanceMeasurement.labelsVisible = !context.distanceMeasurement.labelsVisible;
                         }
                     },
                     {
                         title: "Edit",
-                        doAction: function (context) {
+                        doAction: function (context: any) {
                             distanceMeasurementsMouseControl.deactivate();
                             const measurement = context.distanceMeasurement;
                             const edit = new DistanceMeasurementEditMouseControl(measurement, {
@@ -237,10 +237,10 @@ const XeokitViewer: React.FC<XeokitViewerProps> = ({ modelId, xktSrc, canvasRef}
                 ], [
                     {
                         title: "Clear All",
-                        getEnabled: function (context) {
+                        getEnabled: function (context: any) {
                             return (Object.keys(context.distanceMeasurementsPlugin.measurements).length > 0);
                         },
-                        doAction: function (context) {
+                        doAction: function (context: any) {
                             context.distanceMeasurementsPlugin.clear();
                         }
                     },
@@ -274,10 +274,10 @@ const XeokitViewer: React.FC<XeokitViewerProps> = ({ modelId, xktSrc, canvasRef}
             items: [
                 [
                     {
-                        getTitle: (context) => {
+                        getTitle: (context: any) => {
                             return distanceMeasurementsMouseControl.active ? "Deactivate Control" : "Activate Control";
                         },
-                        doAction: function (context) {
+                        doAction: function (context: any) {
                             distanceMeasurementsMouseControl.active
                                 ? distanceMeasurementsMouseControl.deactivate()
                                 : distanceMeasurementsMouseControl.activate();
@@ -309,7 +309,7 @@ const XeokitViewer: React.FC<XeokitViewerProps> = ({ modelId, xktSrc, canvasRef}
             ]
         });
 
-        viewer.scene.canvas.canvas.addEventListener('contextmenu', (event) => {
+        viewer.scene.canvas.canvas.addEventListener('contextmenu', (event: any) => {
             const canvasPos = getCanvasPosFromEvent(event);
             canvasContextMenu.show(canvasPos[0], canvasPos[1]);
             event.preventDefault();
@@ -320,14 +320,14 @@ const XeokitViewer: React.FC<XeokitViewerProps> = ({ modelId, xktSrc, canvasRef}
         // Create an DistanceMeasurementsPlugin, activate its DistanceMeasuremntsControl
         //------------------------------------------------------------------------------------------------------------------
 
-        distanceMeasurementsPlugin.on("mouseOver", (e) => {
+        distanceMeasurementsPlugin.on("mouseOver", (e: any) => {
             if (endMeasurementEdit) {
                 return;
             }
             e.distanceMeasurement.setHighlighted(true);
         });
 
-        distanceMeasurementsPlugin.on("mouseLeave", (e) => {
+        distanceMeasurementsPlugin.on("mouseLeave", (e: any) => {
             if (endMeasurementEdit) {
                 return;
             }
@@ -337,7 +337,7 @@ const XeokitViewer: React.FC<XeokitViewerProps> = ({ modelId, xktSrc, canvasRef}
             e.distanceMeasurement.setHighlighted(false);
         });
 
-        distanceMeasurementsPlugin.on("contextMenu", (e) => {
+        distanceMeasurementsPlugin.on("contextMenu", (e: any) => {
             if (endMeasurementEdit) {
                 return;
             }
@@ -350,7 +350,7 @@ const XeokitViewer: React.FC<XeokitViewerProps> = ({ modelId, xktSrc, canvasRef}
             e.event.preventDefault();
         });
 
-        const getCanvasPosFromEvent = function (event) {
+        const getCanvasPosFromEvent = function (event: any) {
             const canvasPos = [];
             if (!event) {
                 event = window.event;
@@ -389,7 +389,7 @@ const XeokitViewer: React.FC<XeokitViewerProps> = ({ modelId, xktSrc, canvasRef}
         // sectionPlanes.showControl(sectionPlane.id);
         //
         let isCaptureEnabled = false;
-        let currentSectionPlane = null;
+        let currentSectionPlane: any = null;
 
         handleSectionKeyDown = (e: KeyboardEvent) => {
           if (e.key === 'U') {
@@ -411,7 +411,7 @@ const XeokitViewer: React.FC<XeokitViewerProps> = ({ modelId, xktSrc, canvasRef}
         document.addEventListener('keydown', handleSectionKeyDown);
         document.addEventListener('keyup', handleSectionKeyUp);
 
-        viewer.scene.input.on("mouseclicked", (coords) => {
+        viewer.scene.input.on("mouseclicked", (coords: any) => {
         if (!isCaptureEnabled) {
             return;
         }
@@ -486,7 +486,7 @@ const XeokitViewer: React.FC<XeokitViewerProps> = ({ modelId, xktSrc, canvasRef}
           }
         };
 
-        viewer.cameraControl.on("hover", (coords) => {
+        viewer.cameraControl.on("hover", (coords: any) => {
           const hit = coords?.entity;
 
           // O evento também pode ocorrer sobre espaço vazio, sem Entity.

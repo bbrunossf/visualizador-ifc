@@ -16,8 +16,8 @@ Rodar::
     python -m venv .venv && .venv/Scripts/pip install -r requirements.txt
     .venv/Scripts/python main.py            # http://localhost:9000
 
-Variáveis de ambiente: ``MODELS_DIR``, ``HOST``, ``PORT``, ``IFC_MAX_MB``,
-``CXCONVERTER_PATH``, ``CONVERT2XKT_JS`` (as duas últimas, veja converter_ifc).
+Variáveis de ambiente: ``MODELS_DIR``, ``HOST``, ``PORT``, ``IFC_MAX_MB`` e
+``CONVERT2XKT_JS`` (esta última, veja converter_ifc).
 """
 
 from __future__ import annotations
@@ -115,13 +115,12 @@ def health() -> dict:
 def converter_modelo(
     arquivo: UploadFile = File(...),
     nome: str | None = Form(None),
-    cxconverter: bool = Form(False),
 ) -> JSONResponse:
     """Converte um IFC em XKT e deixa o modelo pronto para visualizar.
 
-    ``cxconverter=true`` usa o pipeline proprietário (XKT bem menor); sem ele,
-    o caminho open source. A escolha é do cliente porque só quem opera sabe se
-    há licença para o ifc2gltf.
+    Um pipeline só, aberto (``convert2xkt``). O alternativo, que geraria um XKT
+    menor, passa por software proprietário da Creoox — o motivo de não estar
+    aqui, com as medições, está no cabeçalho de ``converter_ifc``.
     """
     if not (arquivo.filename or "").lower().endswith(".ifc"):
         raise HTTPException(status_code=400, detail="Envie um arquivo .ifc.")
@@ -134,9 +133,7 @@ def converter_modelo(
         caminho_tmp = Path(tmp) / arquivo.filename
         try:
             _guardar_upload(arquivo.file, caminho_tmp)
-            resultado = converter(
-                caminho_tmp, MODELS_DIR, nome=nome, usar_cxconverter=cxconverter
-            )
+            resultado = converter(caminho_tmp, MODELS_DIR, nome=nome)
         except ErroConversao as exc:
             # 422: o arquivo chegou, mas não foi possível convertê-lo.
             raise HTTPException(status_code=422, detail=str(exc)) from exc

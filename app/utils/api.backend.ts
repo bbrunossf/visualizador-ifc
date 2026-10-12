@@ -27,12 +27,10 @@ export interface EstadoBackend {
 export async function converterIfc(
   arquivo: File,
   nome?: string,
-  usarCxconverter = false,
 ): Promise<ResultadoConversao> {
   const formulario = new FormData();
   formulario.append("arquivo", arquivo);
   if (nome) formulario.append("nome", nome);
-  formulario.append("cxconverter", String(usarCxconverter));
 
   try {
     const resposta = await fetch(`${BACKEND_URL}/converter`, {

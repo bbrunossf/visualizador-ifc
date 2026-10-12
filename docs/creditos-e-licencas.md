@@ -1,19 +1,20 @@
 # Créditos e licenças de terceiros
 
 O código deste repositório é MIT (veja [../LICENSE](../LICENSE)). Ele usa
-software de terceiros, cada um com a sua licença — e uma das dependências exige
-atenção de quem for usar isto comercialmente.
+software de terceiros, cada um com a sua licença.
 
 ## Dependências
 
 | Componente | Papel | Licença |
 |---|---|---|
 | [xeokit-sdk](https://xeokit.io/) | motor 3D que carrega o XKT no navegador | **AGPL-3.0** |
-| [@xeokit/xeokit-convert](https://github.com/xeokit/xeokit-convert) (`convert2xkt`) | converte IFC/glTF em XKT (Node.js) | AGPL-3.0 |
+| [@xeokit/xeokit-convert](https://github.com/xeokit/xeokit-convert) (`convert2xkt`) | converte o IFC em XKT (Node.js) | AGPL-3.0 |
 | [Remix](https://remix.run/) / React | aplicação web | MIT |
 | [FastAPI](https://fastapi.tiangolo.com/) / Uvicorn | API de conversão | MIT / BSD |
 | [Tailwind CSS](https://tailwindcss.com/) | estilos | MIT |
-| [cxconverter](https://github.com/Creoox/creoox-ifc2gltfcxconverter) (opcional) | ifc2gltf da Creoox, pipeline alternativo | proprietária (versão gratuita = avaliação) |
+
+Nenhuma dependência proprietária. O projeto **não** usa o `cxconverter`
+(ifc2gltf, da Creoox): o motivo, com as medições, está no README.
 
 ### Sobre o xeokit-sdk ser AGPL-3.0
 
@@ -22,14 +23,6 @@ projeto é aberto**, a obrigação da AGPL de disponibilizar o código-fonte est
 atendida por definição. Quem quiser usar o SDK em produto fechado precisa de
 licença comercial da xeokit — o que vale para o SDK, não para o código deste
 recorte, que segue MIT.
-
-### Sobre o cxconverter (pipeline opcional)
-
-O binário do `ifc2gltf` da Creoox não é open source: a versão gratuita é de
-avaliação, exige configuração explícita para ser usada e **embute marca d'água
-invisível na geometria** (string `Embedded invisible evaluation watermark`
-presente no executável). O uso comercial exige licença da Creoox. Por isso o
-pipeline padrão deste projeto é o **community**, que é 100% open source.
 
 ## Modelo usado nas imagens do README
 

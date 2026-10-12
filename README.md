@@ -28,7 +28,9 @@ versionado neste repositório.*
 Não há banco de dados. O estado do sistema é a pasta de modelos: o que está lá é
 o que o viewer abre. Isso deixa a aplicação de pé com duas dependências
 (Python e o pacote de conversão do Node) e faz com que nenhum dado de cliente
-precise entrar no repositório.
+precise entrar no repositório. **O navegador nunca recebe o IFC**: o arquivo é
+convertido no servidor e só o XKT chega ao viewer (que importa o
+`XKTLoaderPlugin`, sem nenhum parser de IFC).
 
 ## Origem desta cópia
 
@@ -47,10 +49,9 @@ visualizador:
 | Importação de biblioteca comercial de UI (Syncfusion) no layout raiz | removida: o visualizador não usa nenhum componente dela |
 | Agente de IA acoplado ao viewer (API semântica exposta em `window`) | removido, junto com o WebSocket do agente |
 | Formulário de características da obra gravando no banco | removido |
-| `convert_ifc_to_glb` chamava o `cxconverter` e o `convert2xkt` sem compressão | pipeline community com `-b` por padrão (veja abaixo) |
-| Metadados do `cxconverter` iam crus para o XKT | passam por normalização: as propriedades vêm por índice e viram valores inline |
+| Conversão em dois passos, pelo `cxconverter` (proprietário) + `convert2xkt` | uma ferramenta só, aberta: `convert2xkt` lendo o IFC direto (veja abaixo o motivo) |
 | Nome de arquivo do XKT montado a partir de obra + prédio + data | nome do modelo + data e hora |
-| `fs.readFile` de arquivo de modelo sem validar o nome vindo da URL | validação de caminho em toda rota que recebe nome de arquivo |
+| Leitura de arquivo de modelo sem validar o nome vindo da URL | validação de caminho em toda rota que recebe nome de arquivo |
 
 ## Como rodar
 
@@ -89,57 +90,68 @@ npm run dev               # http://localhost:3000
 
 Em produção: `npm run build && npm start`.
 
-### Pipeline opcional: cxconverter
+## A conversão, medida
 
-O `cxconverter` (ifc2gltf, da Creoox) gera um XKT **9x menor** e com mais
-*property sets*, preservando o reaproveitamento de geometria do IFC. Para usá-lo,
-baixe o executável em
-[Creoox/creoox-ifc2gltfcxconverter](https://github.com/Creoox/creoox-ifc2gltfcxconverter/releases)
-e aponte a variável de ambiente. Na tela inicial aparece a opção de usar esse
-pipeline por conversão.
+Um modelo de 1,2 MB de estrutura metálica (exportado do Tekla Structures), na
+mesma máquina:
 
-> **Licença:** o pipeline cxconverter **não é open source**. O binário gratuito
-> é a versão de avaliação da Creoox e embute **marca d'água invisível** nos
-> componentes POSITION da geometria (a string `Embedded invisible evaluation
-> watermark` está dentro do executável). O uso comercial exige licença da
-> Creoox. Por isso o **padrão do projeto é o pipeline community**.
+| | |
+|---|---|
+| Comando | `convert2xkt -s modelo.ifc -b -o modelo.xkt` |
+| **XKT gerado** | **1,29 MB** |
+| Metaobjetos | 751 |
+| Property sets | 249 (com os valores inline) |
+| Triângulos | 736.920 |
+| Tempo (aquecido) | 5,6 s |
 
-## Os dois pipelines, medidos
+Duas coisas que custaram para descobrir e ficam registradas:
 
-Mesmo modelo (`.ifc` de 1,2 MB de estrutura metálica, exportado do Tekla
-Structures), mesma máquina:
+- **O `-b` (compressBuffers) é decisivo.** Sem ele o XKT sai com os buffers e o
+  metadado sem compressão: **14,03 MB** contra 1,29 MB no mesmo modelo — onze
+  vezes mais, e o metadado vai junto sem compactar.
+- **A primeira conversão depois de ligar a máquina é bem mais lenta.** Node
+  subindo e o módulo wasm do `web-ifc` carregando custam segundos que não
+  aparecem no tempo interno do conversor: o mesmo modelo levou **22 s a frio
+  contra 5,6 s aquecido**.
 
-|                              | community          | cxconverter       |
-|------------------------------|--------------------|-------------------|
-| Ferramentas                  | 1 (`convert2xkt`)  | 2 (+ `cxconverter`) |
-| **XKT com `-b`**             | **1,29 MB**        | **0,14 MB**       |
-| XKT sem `-b`                 | 14,03 MB           | 0,96 MB           |
-| Metaobjetos no XKT           | 751                | 751               |
-| Property sets                | 249                | 484               |
-| Triângulos                   | 736.920            | 5.930             |
-| Tempo de conversão           | 5,6 s              | 2,0 s             |
-| Licença                      | open source        | proprietária (avaliação) |
+## Por que existe um pipeline só
 
-Três coisas que essa tabela mostra e que custaram para descobrir:
+O xeokit documenta um pipeline alternativo, de duas ferramentas, que preserva o
+reaproveitamento de geometria que já existe no IFC e entrega um XKT bem menor.
+Ele foi implementado aqui, medido — e removido:
 
-- **O `-b` (compressBuffers) é decisivo.** Sem ele o XKT sai com buffers e
-  metadados sem compressão: 14 MB contra 1,29 MB no mesmo modelo. É a diferença
-  entre um modelo que abre em segundos e um que trava o navegador.
-- **O metadado precisa viajar junto.** O `convert2xkt` embute no XKT o JSON de
-  metadados passado em `-m`; sem ele, o XKT fica com uma raiz "default" e o
-  painel de propriedades abre vazio.
-- **O JSON do `cxconverter` usa índices, não valores.** Cada `propertySet` aponta
-  para um array global de propriedades por posição (`"properties": [0, 1, 2…]`).
-  O viewer espera os valores inline (`{name, value, type}`), como o pipeline
-  community grava. Sem essa normalização o painel de propriedades mostra nada —
-  em `backend/converter_ifc.py` isso é a função `normalizar_metamodelo`.
+| | `convert2xkt` (usado) | `cxconverter` + `convert2xkt` (removido) |
+|---|---|---|
+| Ferramentas | 1, open source | 2, a primeira proprietária |
+| XKT (modelo de 1,2 MB) | 1,29 MB | **0,14 MB** |
+| Property sets | 249 | **484** |
+| Tempo | 5,6 s | 2,0 s |
+| Licença | nenhuma | comercial, da Creoox |
+
+O motivo de não usar o segundo: a versão gratuita do `cxconverter` (ifc2gltf) é
+a **de avaliação**, e ela não é neutra. O binário reescreve o nome do
+`IfcProject` no metadado, acrescentando `- evaluation version` — que é o nome
+que o viewer mostra como nome do modelo. Verificado convertendo o mesmo IFC
+pelos dois caminhos:
+
+| | Ocorrências de "evaluation" |
+|---|---|
+| O IFC de entrada | **0** |
+| Saída do `cxconverter` (JSON e XKT) | **1** — no nome do projeto |
+| Saída do `convert2xkt` | **0** |
+
+E a conversão **não avisa**: a saída do executável de avaliação é idêntica à de
+uma licenciada. A marca só sai comprando licença e preenchendo `licenceKey` no
+`cxconverter.json` (o arquivo de configuração que acompanha o binário). Como
+existe um caminho gratuito, limpo e sem intermediário proprietário, o projeto
+usa só ele e aceita o arquivo maior.
 
 ## Estrutura
 
 ```
 backend/
   main.py              API FastAPI: /converter, /modelos, DELETE /modelos/{nome}
-  converter_ifc.py     conversão IFC → XKT, os dois pipelines e a normalização
+  converter_ifc.py     conversão IFC → XKT (uma ferramenta, sem shell no comando)
   requirements.txt
 app/
   routes/_index.tsx        galeria: converte, lista e remove modelos
@@ -155,27 +167,30 @@ var/app-data/models/   onde os .xkt ficam (fora do git)
 
 ## Limitações conhecidas
 
-- **A primeira conversão depois de ligar a máquina é bem mais lenta.** Node subindo e o módulo
-  wasm do `web-ifc` carregando custam segundos que não aparecem no tempo interno do conversor: o
-  mesmo modelo levou **22 s a frio contra 5,6 s já aquecido**. Os tempos da tabela acima são de
-  execução aquecida.
+- **Modelos grandes produzem XKT grandes.** Sem o reaproveitamento de geometria
+  do pipeline removido, a geometria é achatada e o arquivo cresce junto com o
+  modelo, sem a deduplicação de malhas que a outra ferramenta fazia. Para
+  modelos de centenas de MB, as saídas são o pipeline licenciado (acima) ou
+  reduzir o modelo antes de converter — o `-i`/`-x` do `convert2xkt` inclui ou
+  exclui tipos de elemento, e converter por disciplina ou por pavimento diminui
+  muito o resultado.
 - O **painel do objeto sob o cursor** não pôde ser verificado por automação (o
   hover depende do ponteiro real sobre o canvas); o código é o do sistema de
   origem, sem alteração.
 - O upload do frontend passa pela memória do servidor do Remix — modelos da
   ordem de centenas de MB pedem um *upload handler* em disco.
 - A conversão é **síncrona**: para um IFC grande a requisição fica aberta até o
-  fim. Um modelo de 52 MB pode levar minutos.
+  fim.
 - Não há autenticação: a aplicação foi feita para rodar em rede local. Publicar
   na internet exige pôr autenticação na frente.
 - O `-i`/`-x` do `convert2xkt` (incluir/excluir tipos) não é exposto na
-  interface.
+  interface — é o caminho natural para reduzir o tamanho de um modelo grande.
 
 ## Licença
 
-O código deste repositório está sob **MIT** (veja [LICENSE](LICENSE)). As
-dependências mantêm as suas licenças — em especial o **xeokit-sdk, que é
-AGPL-3.0**: como este projeto é aberto, a obrigação de disponibilizar a fonte
-está atendida; uso comercial do SDK sem abrir o código exige licença da
-xeokit. O pipeline opcional com `cxconverter` depende de software proprietário
-da Creoox (veja acima).
+O código deste repositório está sob **MIT** (veja [LICENSE](LICENSE)). A
+dependência principal é o **xeokit-sdk, que é AGPL-3.0**: como este projeto é
+aberto, a obrigação de disponibilizar a fonte está atendida; uso comercial do
+SDK sem abrir o código exige licença da xeokit. Não há mais nenhuma dependência
+proprietária — veja
+[docs/creditos-e-licencas.md](docs/creditos-e-licencas.md).
