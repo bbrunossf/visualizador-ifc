@@ -1,0 +1,10 @@
+# Dependências do backend (conversão e entrega dos modelos).
+#
+# Não há driver de banco: este projeto não usa banco de dados.
+# O ifcopenshell NÃO é necessário — a leitura do IFC é feita pelo convert2xkt
+# (Node.js), que é uma dependência externa, não um pacote Python.
+fastapi==0.115.0
+uvicorn[standard]==0.30.1
+# python-multipart é obrigatório para o FastAPI ler formulários e uploads
+# (File/Form). Sem ele o /converter responde 500 na primeira chamada.
+python-multipart==0.0.9

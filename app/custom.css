@@ -1,0 +1,60 @@
+.spinner {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000; /* Garante que o spinner fique sobre outros elementos */
+    font-size: 24px; /* Ajuste o tamanho conforme necessário */
+    color: #1124d1; /* Cor do texto do spinner */
+  }
+
+/* Reduzir espaçamento entre itens do TreeView */
+.resource-tree .e-list-item {
+  padding: 2px 0 !important; /* Reduz o padding vertical dos itens */
+  margin: 0 !important; /* Remove margens */
+  min-height: 20px !important; /* Define altura mínima menor */
+}
+
+/* Reduzir espaçamento do texto do item */
+.resource-tree .e-list-text {
+  line-height: 1.2 !important; /* Reduz o espaçamento entre linhas */
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Reduzir espaçamento do ícone expansão/colapso */
+.resource-tree .e-icons {
+  margin: 0 4px 0 0 !important; /* Reduz margem do ícone */
+}
+
+/* Reduzir espaçamento do container da lista */
+.resource-tree .e-list-parent {
+  padding: 0 !important;
+}
+
+/* Ajustar espaçamento dos itens filhos */
+.resource-tree .e-list-item .e-list-item {
+  margin-left: 16px !important; /* Indentação dos itens filhos */
+}
+
+/* Opcional: Reduzir ainda mais o espaçamento se necessário */
+.resource-tree .e-treeview {
+  line-height: 1.1 !important;
+}
+
+/* Reduzir padding do PropertyPane se necessário */
+.resource-tree {
+  padding: 0 !important;
+}
+
+/* Formatação para itens selecionados - fonte azul e negrito */
+.resource-tree .e-list-item.e-active .e-list-text {
+  color: #0078d4 !important; /* Cor azul */
+  font-weight: bold !important; /* Negrito */
+}
+
+/* Para múltiplas seleções */
+.resource-tree .e-list-item.e-node-select .e-list-text {
+  color: #0078d4 !important; /* Cor azul */
+  font-weight: bold !important; /* Negrito */
+}

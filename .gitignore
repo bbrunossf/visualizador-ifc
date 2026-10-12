@@ -1,0 +1,30 @@
+# dependências
+node_modules/
+.venv/
+venv/
+
+# build do Remix / do frontend
+/build/
+/.cache/
+.cache/
+
+# modelos convertidos e artefatos gerados: fora do repositório de propósito
+/var/
+/public/models/
+
+# arquivos locais de configuração (o modelo é o .env.example)
+.env
+.env.*
+!.env.example
+
+# material que não vai para o repositório público
+_NAO_PUBLICAR/
+
+# python
+__pycache__/
+*.py[cod]
+
+# sistema / editor
+.DS_Store
+Thumbs.db
+*.log
