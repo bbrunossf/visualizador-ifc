@@ -155,6 +155,10 @@ var/app-data/models/   onde os .xkt ficam (fora do git)
 
 ## Limitações conhecidas
 
+- **A primeira conversão depois de ligar a máquina é bem mais lenta.** Node subindo e o módulo
+  wasm do `web-ifc` carregando custam segundos que não aparecem no tempo interno do conversor: o
+  mesmo modelo levou **22 s a frio contra 5,6 s já aquecido**. Os tempos da tabela acima são de
+  execução aquecida.
 - O **painel do objeto sob o cursor** não pôde ser verificado por automação (o
   hover depende do ponteiro real sobre o canvas); o código é o do sistema de
   origem, sem alteração.
